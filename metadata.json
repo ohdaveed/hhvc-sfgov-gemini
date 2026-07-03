@@ -1,0 +1,6 @@
+{
+  "name": "SF Housing & Vector Control Mockup Tool & Brand Manual",
+  "description": "A collaborative workspace for designers to generate web layouts for San Francisco Department of Public Health Healthy Housing & Vector Control, run automated accessibility audits, manage Google Tasks checklists, and inspect brand guidelines.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

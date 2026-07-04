@@ -1,0 +1,73 @@
+{
+  "entities": {
+    "MockLayout": {
+      "title": "MockLayout",
+      "description": "Karl CMS Page template layout used for rapid web layout generation and approval.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier of the layout."
+        },
+        "pageName": {
+          "type": "string",
+          "description": "Name of the mock page blueprint."
+        },
+        "taskGoal": {
+          "type": "string",
+          "description": "One clear civic task goal that this page serves."
+        },
+        "components": {
+          "type": "array",
+          "description": "The ordered list of Karl CMS components structured on the page."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Creation timestamp."
+        }
+      },
+      "required": ["id", "pageName", "taskGoal", "components", "createdAt"]
+    },
+    "BrandGuideline": {
+      "title": "BrandGuideline",
+      "description": "Official brand standard or WCAG 2.1 AA checklist item.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier of the guideline."
+        },
+        "section": {
+          "type": "string",
+          "description": "The header section of the guideline manual."
+        },
+        "category": {
+          "type": "string",
+          "enum": ["typography", "colors", "components", "accessibility", "tone"],
+          "description": "The compliance category."
+        },
+        "content": {
+          "type": "string",
+          "description": "Detailed text content of the brand standards."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Last updated timestamp."
+        }
+      },
+      "required": ["id", "section", "category", "content", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "users/{userId}/layouts/{layoutId}": {
+      "schema": "MockLayout",
+      "description": "Saved mock page layouts created by the specific user."
+    },
+    "users/{userId}/guidelines/{guidelineId}": {
+      "schema": "BrandGuideline",
+      "description": "Custom or overridden brand manual guidelines edited by the specific user."
+    }
+  }
+}

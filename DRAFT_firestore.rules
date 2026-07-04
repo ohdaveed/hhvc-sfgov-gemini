@@ -1,0 +1,114 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Global safety catch-all: Default Deny All
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Primitive definitions
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerified() {
+      return isSignedIn() && (
+        !('email_verified' in request.auth.token) || 
+        request.auth.token.email_verified == true
+      );
+    }
+
+    function isOwner(userId) {
+      return isVerified() && request.auth.uid == userId;
+    }
+
+    // Entity Schema Validations
+    function isValidLayout(data, layoutId) {
+      return data.id == layoutId 
+          && data.id is string && data.id.size() <= 128
+          && data.pageName is string && data.pageName.size() > 0 && data.pageName.size() <= 200
+          && data.taskGoal is string && data.taskGoal.size() > 0 && data.taskGoal.size() <= 500
+          && data.components is list && data.components.size() <= 30
+          && data.createdAt is string && data.createdAt.size() <= 100
+          && (!data.keys().hasAny(['updatedAt']) || (data.updatedAt is string && data.updatedAt.size() <= 100));
+    }
+
+    function isValidBrandGuideline(data, guidelineId) {
+      return data.id == guidelineId
+          && data.id is string && data.id.size() <= 128
+          && data.section is string && data.section.size() > 0 && data.section.size() <= 150
+          && data.category is string && (
+               data.category == "typography" || 
+               data.category == "colors" || 
+               data.category == "components" || 
+               data.category == "accessibility" || 
+               data.category == "tone"
+             )
+          && data.content is string && data.content.size() <= 5000
+          && data.updatedAt is string && data.updatedAt.size() <= 100;
+    }
+
+    // Match patterns and collection rules
+    match /users/{userId} {
+      
+      // User space matching
+      match /layouts/{layoutId} {
+        
+        allow get, list: if isOwner(userId);
+        
+        allow create: if (
+          isOwner(userId) && 
+          isValidId(layoutId) && 
+          isValidLayout(incoming(), layoutId) && 
+          incoming().keys().hasAll(['id', 'pageName', 'taskGoal', 'components', 'createdAt']) && 
+          (incoming().keys().size() == 5 || (incoming().keys().size() == 6 && incoming().keys().hasAll(['updatedAt'])))
+        );
+        
+        allow update: if (
+          isOwner(userId) && 
+          isValidId(layoutId) && 
+          isValidLayout(incoming(), layoutId) && 
+          incoming().createdAt == existing().createdAt && 
+          incoming().diff(existing()).affectedKeys().hasOnly(['pageName', 'taskGoal', 'components', 'updatedAt'])
+        );
+        
+        allow delete: if isOwner(userId) && isValidId(layoutId);
+      }
+
+      match /guidelines/{guidelineId} {
+        
+        allow get, list: if isOwner(userId);
+        
+        allow create: if (
+          isOwner(userId) && 
+          isValidId(guidelineId) && 
+          isValidBrandGuideline(incoming(), guidelineId) && 
+          incoming().keys().hasAll(['id', 'section', 'category', 'content', 'updatedAt']) && 
+          incoming().keys().size() == 5
+        );
+        
+        allow update: if (
+          isOwner(userId) && 
+          isValidId(guidelineId) && 
+          isValidBrandGuideline(incoming(), guidelineId) && 
+          incoming().diff(existing()).affectedKeys().hasOnly(['section', 'category', 'content', 'updatedAt'])
+        );
+        
+        allow delete: if isOwner(userId) && isValidId(guidelineId);
+      }
+    }
+  }
+}

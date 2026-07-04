@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import localforage from "localforage";
 import { User } from "firebase/auth";
 import { 
   getMockLayouts, 
@@ -16,6 +17,7 @@ import WorkspacePanel from "./components/WorkspacePanel";
 import BrandManual from "./components/BrandManual";
 import MockupCanvas from "./components/MockupCanvas";
 import AuditPanel from "./components/AuditPanel";
+import RulesReference from "./components/RulesReference";
 import { 
   Layout, 
   BookOpen, 
@@ -27,12 +29,13 @@ import {
   X,
   Plus,
   ShieldCheck,
-  Award
+  Award,
+  ShieldAlert
 } from "lucide-react";
 
 export default function App() {
   // Global States
-  const [activeTab, setActiveTab] = useState<"canvas" | "manual" | "auditor">("canvas");
+  const [activeTab, setActiveTab] = useState<"canvas" | "manual" | "auditor" | "rules">("canvas");
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [layouts, setLayouts] = useState<MockLayout[]>(DEFAULT_MOCK_LAYOUTS);
@@ -50,29 +53,71 @@ export default function App() {
     setToken(accessToken);
   }, []);
 
-  // Fetch from Firestore on sign-in
+  // Fetch from Firestore on sign-in, or from localforage if offline/no user
   useEffect(() => {
     async function loadUserData() {
       if (user) {
-        const customLayouts = await getMockLayouts(user.uid);
-        if (customLayouts.length > 0) {
-          setLayouts(customLayouts);
-          setActiveLayoutId(customLayouts[0].id);
+        try {
+          const customLayouts = await getMockLayouts(user.uid);
+          if (customLayouts.length > 0) {
+            setLayouts(customLayouts);
+            setActiveLayoutId(customLayouts[0].id);
+          } else {
+            // Check localforage as a fallback if firestore has no layouts
+            const cachedLayouts = await localforage.getItem<MockLayout[]>("mock_layouts");
+            if (cachedLayouts && cachedLayouts.length > 0) {
+              setLayouts(cachedLayouts);
+              setActiveLayoutId(cachedLayouts[0].id);
+            }
+          }
+        } catch (e) {
+          console.error("Firestore layouts fetch failed, trying localforage fallback", e);
+          const cachedLayouts = await localforage.getItem<MockLayout[]>("mock_layouts");
+          if (cachedLayouts && cachedLayouts.length > 0) {
+            setLayouts(cachedLayouts);
+            setActiveLayoutId(cachedLayouts[0].id);
+          }
         }
 
-        const customGuidelines = await getCustomGuidelines(user.uid);
-        if (customGuidelines.length > 0) {
-          setGuidelines(customGuidelines);
+        try {
+          const customGuidelines = await getCustomGuidelines(user.uid);
+          if (customGuidelines.length > 0) {
+            setGuidelines(customGuidelines);
+          }
+        } catch (e) {
+          console.error("Firestore guidelines fetch failed", e);
         }
       } else {
-        // Reset to presets on sign-out
-        setLayouts(DEFAULT_MOCK_LAYOUTS);
-        setActiveLayoutId(DEFAULT_MOCK_LAYOUTS[0].id);
+        // Not logged in: try to load from offline cache
+        try {
+          const cachedLayouts = await localforage.getItem<MockLayout[]>("mock_layouts");
+          if (cachedLayouts && cachedLayouts.length > 0) {
+            setLayouts(cachedLayouts);
+            setActiveLayoutId(cachedLayouts[0].id);
+          } else {
+            setLayouts(DEFAULT_MOCK_LAYOUTS);
+            setActiveLayoutId(DEFAULT_MOCK_LAYOUTS[0].id);
+          }
+        } catch (e) {
+          console.error("Failed to load cached layouts", e);
+          setLayouts(DEFAULT_MOCK_LAYOUTS);
+          setActiveLayoutId(DEFAULT_MOCK_LAYOUTS[0].id);
+        }
+        
         setGuidelines(DEFAULT_BRAND_GUIDELINES);
       }
     }
     loadUserData();
   }, [user]);
+
+  // Persist layout changes to local cache for offline work
+  useEffect(() => {
+    // We only want to save layouts once they've been potentially loaded.
+    // If the array is not empty, save it.
+    if (layouts && layouts.length > 0) {
+      localforage.setItem("mock_layouts", layouts).catch(e => console.error("Failed to cache layouts", e));
+    }
+  }, [layouts]);
 
   // Handle imported document/sheet contents from Workspace Panel
   const handleImportSource = (title: string, content: string) => {
@@ -191,6 +236,18 @@ export default function App() {
                 <CheckCircle className="h-4 w-4 text-blue-600" />
                 WCAG & Karl CMS Auditor
               </button>
+
+              <button
+                onClick={() => setActiveTab("rules")}
+                className={`flex items-center gap-2 text-xs font-semibold px-4 py-2.5 rounded-xl transition cursor-pointer ${
+                  activeTab === "rules"
+                    ? "bg-white text-blue-600 shadow-sm border border-slate-200"
+                    : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                }`}
+              >
+                <ShieldAlert className="h-4 w-4 text-amber-500" />
+                Director's Rules Reference
+              </button>
             </nav>
           </div>
         </div>
@@ -256,6 +313,12 @@ export default function App() {
             <AuditPanel 
               initialContent={auditInitialContent}
               onAddTaskToRedesign={handleAddTaskToRedesign}
+            />
+          )}
+
+          {activeTab === "rules" && (
+            <RulesReference 
+              onSendToAuditor={handleTriggerAuditFromCanvas}
             />
           )}
         </div>

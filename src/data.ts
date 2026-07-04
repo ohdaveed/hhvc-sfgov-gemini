@@ -93,6 +93,18 @@ export const PRESET_COMPONENTS: KarlComponent[] = [
       bgColor: "bg-amber-100 border-l-4 border-amber-500",
       textColor: "text-amber-900"
     }
+  },
+  {
+    id: "comp-image",
+    type: "image-card",
+    title: "Inspection Image Card",
+    description: "AI-generated context-specific visual specimens for housing inspections, complete with compliance descriptions.",
+    properties: {
+      heading: "Inspection Specimen Image",
+      subheading: "Generate high-contrast visual examples for inspectors or citizen manuals.",
+      imageUrl: "",
+      imagePrompt: "rodent-proof storage examples"
+    }
   }
 ];
 
@@ -250,6 +262,72 @@ In the Karl CMS, components are structural units. To ensure future scalability, 
 2.  **Explicit Form Labels**: No floating placeholder-only inputs. All inputs must have a companion \`<label>\` tag with a clear \`htmlFor\` attribute matching the input \`id\`.
 3.  **Keyboard Navigation**: Accordions and service grids must be focusable using standard Tab sequences (\`focus:ring-2 focus:ring-blue-500\`).
 4.  **No Pure Color Indicators**: Never convey active vector outbreak levels using only Red/Yellow dots. Always pair visual colors with distinct text (e.g., "Critical Level" or "[Severe Alert]").`,
+    updatedAt: "2026-07-02"
+  },
+  {
+    id: "bg-blueprints",
+    section: "Karl CMS Blueprint Templates",
+    category: "components",
+    content: `## Karl CMS Component & Page Blueprint Templates
+
+This single-source-of-truth blueprint system provides structured templates for Karl CMS page content types and standard components, facilitating rapid layouts that guarantee brand alignment and manager approval.
+
+---
+
+### Part 1: Page Blueprint Templates (Standard Layout Trees)
+
+To accelerate content creation, use the following standard component hierarchies for our primary civic tasks:
+
+#### 1. Page Content Type: "Citizen Portal Home"
+*   **Core Goal**: Educate citizens, publicize critical alerts, and route visitors to self-service portals.
+*   **Component Structure Tree**:
+    1.  **Hero Banner Component**: Defines high-level civic mission.
+    2.  **Search Bar Component**: Allows direct query routing.
+    3.  **Info Banner Component** (Optional): Displays active health advisories.
+    4.  **Services Grid Component**: Provides clear 44px+ touch-targets for specific pest/housing hazards.
+*   **Approval Guideline**: The page must contain exactly ONE primary call to action (CTA) in the hero banner.
+
+#### 2. Page Content Type: "Incident Reporting & Map Portal"
+*   **Core Goal**: Empower tenants and citizens to file compliant reports and view active localized abatements.
+*   **Component Structure Tree**:
+    1.  **Hero Banner Component**: Summarizes reporter rights and tenant protections.
+    2.  **Interactive Map Module**: Renders vector/hazard densities across SF neighborhoods.
+    3.  **Complaint Form Component**: Collects structured, accessible complaint data.
+*   **Approval Guideline**: Form fields must include clear descriptive labels (\`htmlFor\`) to facilitate screen-readers.
+
+#### 3. Page Content Type: "Dynamic Regulation & FAQ Hub"
+*   **Core Goal**: Answer legal, pest, and landlord responsibilities dynamically.
+*   **Component Structure Tree**:
+    1.  **Hero Banner Component**: Standard simple title of regulations.
+    2.  **Search Bar Component**: Filters regulations by pest keyword.
+    3.  **FAQ Accordion Component**: Expandable legal sections (e.g., SF Health Code Section 581).
+*   **Approval Guideline**: Accordions must be fully keyboard focusable using standard Tab sequences.
+
+---
+
+### Part 2: Component Blueprint Specs
+
+Each component in the Karl CMS has strict, immutable properties to ensure visual and functional accessibility:
+
+| Component Type | Permitted Properties | WCAG 2.1 AA Mandates | Brand Alignment Rules |
+| :--- | :--- | :--- | :--- |
+| **Hero Banner** | \`heading\`, \`subheading\`, \`buttonText\`, \`bgColor\`, \`textColor\` | Contrast >= 4.5:1 on headers | Use \`Space Grotesk\` font for headers, \`Inter\` for subheadings. |
+| **Search Bar** | \`placeholder\`, \`buttonText\`, \`showFilters\` | Clear companion labels; Input must be focusable | Search button must use high-contrast \`Health Blue\` theme. |
+| **Services Grid** | \`serviceTypes\` (list) | Touch target >= 44x44px; Focus ring visible | Cards must use soft grey margins with explicit labels. |
+| **Interactive Map**| \`heading\`, \`subheading\` | No color-only information cues; Screen-reader alt-text | Pins must be paired with distinct status strings. |
+| **Complaint Form** | \`heading\`, \`fields\` (label, required, type) | Explicit \`<label htmlFor="...">\`; Clear error boundaries | Require Phone and Address fields; buttons must align to grid. |
+| **FAQ Accordion**  | \`heading\` | Fully keyboard navigable; Expanded states announced | Questions in bold \`Inter\`; answers separated by clear margins. |
+| **Info Banner** | \`heading\`, \`subheading\`, \`bgColor\`, \`textColor\` | Alert Red contrast ratio is 19:1; Amber contrast is 7:1 | Restricted to standard SFDPH warning colors (Amber or Red). |
+
+---
+
+### Part 3: Manager Approval Checklist
+
+Before submitting a mockup canvas to managers for official publishing:
+1.  **Single Task Goal**: Does this layout focus on solving one distinct user task?
+2.  **Contrast Audit**: Are all text elements validated at >= 4.5:1 (Normal) and >= 3:1 (Large)?
+3.  **No Pure Color Cues**: Are critical alerts paired with descriptive text (e.g., "[Critical Outbreak Warning]")?
+4.  **Touch Target Compliance**: Are all interactive elements styled with a minimum target of 44x44px?`,
     updatedAt: "2026-07-02"
   }
 ];

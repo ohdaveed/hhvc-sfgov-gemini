@@ -1,16 +1,16 @@
-import { db } from "./firebase";
+import { db, handleFirestoreError, OperationType } from "./firebase";
 import { 
   collection, 
   doc, 
   setDoc, 
   getDocs, 
   deleteDoc, 
-  query, 
-  orderBy 
+  query 
 } from "firebase/firestore";
 import { MockLayout, BrandGuideline } from "../types";
 
 export const saveMockLayout = async (userId: string, layout: MockLayout): Promise<void> => {
+  const path = `users/${userId}/layouts/${layout.id}`;
   try {
     const docRef = doc(db, "users", userId, "layouts", layout.id);
     await setDoc(docRef, {
@@ -18,12 +18,12 @@ export const saveMockLayout = async (userId: string, layout: MockLayout): Promis
       updatedAt: new Date().toISOString()
     });
   } catch (err) {
-    console.error("Firestore save error:", err);
-    throw err;
+    handleFirestoreError(err, OperationType.WRITE, path);
   }
 };
 
 export const getMockLayouts = async (userId: string): Promise<MockLayout[]> => {
+  const path = `users/${userId}/layouts`;
   try {
     const colRef = collection(db, "users", userId, "layouts");
     const q = query(colRef);
@@ -34,22 +34,23 @@ export const getMockLayouts = async (userId: string): Promise<MockLayout[]> => {
     });
     return layouts;
   } catch (err) {
-    console.error("Firestore fetch error:", err);
+    handleFirestoreError(err, OperationType.GET, path);
     return [];
   }
 };
 
 export const deleteMockLayout = async (userId: string, layoutId: string): Promise<void> => {
+  const path = `users/${userId}/layouts/${layoutId}`;
   try {
     const docRef = doc(db, "users", userId, "layouts", layoutId);
     await deleteDoc(docRef);
   } catch (err) {
-    console.error("Firestore delete error:", err);
-    throw err;
+    handleFirestoreError(err, OperationType.DELETE, path);
   }
 };
 
 export const saveCustomGuideline = async (userId: string, guideline: BrandGuideline): Promise<void> => {
+  const path = `users/${userId}/guidelines/${guideline.id}`;
   try {
     const docRef = doc(db, "users", userId, "guidelines", guideline.id);
     await setDoc(docRef, {
@@ -57,12 +58,12 @@ export const saveCustomGuideline = async (userId: string, guideline: BrandGuidel
       updatedAt: new Date().toISOString()
     });
   } catch (err) {
-    console.error("Firestore save guideline error:", err);
-    throw err;
+    handleFirestoreError(err, OperationType.WRITE, path);
   }
 };
 
 export const getCustomGuidelines = async (userId: string): Promise<BrandGuideline[]> => {
+  const path = `users/${userId}/guidelines`;
   try {
     const colRef = collection(db, "users", userId, "guidelines");
     const snap = await getDocs(colRef);
@@ -72,7 +73,7 @@ export const getCustomGuidelines = async (userId: string): Promise<BrandGuidelin
     });
     return guidelines;
   } catch (err) {
-    console.error("Firestore fetch guidelines error:", err);
+    handleFirestoreError(err, OperationType.GET, path);
     return [];
   }
 };

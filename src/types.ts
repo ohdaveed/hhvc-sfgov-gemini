@@ -1,6 +1,6 @@
 export interface KarlComponent {
   id: string;
-  type: "hero" | "services-grid" | "interactive-map" | "search-bar" | "complaint-form" | "info-banner" | "faq-accordion";
+  type: "hero" | "services-grid" | "interactive-map" | "search-bar" | "complaint-form" | "info-banner" | "faq-accordion" | "image-card";
   title: string;
   description: string;
   properties: {
@@ -14,6 +14,8 @@ export interface KarlComponent {
     showSearch?: boolean;
     serviceTypes?: string[];
     fields?: { name: string; type: string; label: string; required: boolean }[];
+    imageUrl?: string;
+    imagePrompt?: string;
   };
 }
 

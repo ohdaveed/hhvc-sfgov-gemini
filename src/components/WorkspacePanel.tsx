@@ -100,7 +100,7 @@ export default function WorkspacePanel({
       const data = await res.json();
       setFiles(data.files || []);
     } catch (err: any) {
-      console.error("Error fetching Drive:", err);
+      console.warn("Error fetching Drive:", err);
       setError("Unable to load Drive files. Please ensure Drive permissions are active.");
       // Fallback with visual mock files if fetching fails but user is authenticated
       setFiles([
@@ -141,7 +141,7 @@ export default function WorkspacePanel({
       const data = await res.json();
       setTasks(data.items || []);
     } catch (err: any) {
-      console.error("Error fetching Tasks:", err);
+      console.warn("Error fetching Tasks:", err);
       setError("Could not sync with Google Tasks.");
       setTasks([
         { id: "t-1", title: "Complete WCAG 2.1 AA Color Contrast Checks", status: "completed" },
@@ -185,7 +185,7 @@ export default function WorkspacePanel({
         throw new Error("Failed to write to Google Tasks API.");
       }
     } catch (err: any) {
-      console.error("Error writing task:", err);
+      console.warn("Error writing task:", err);
       // Fallback update
       const fakeNew: WorkspaceTask = {
         id: "t-" + Date.now(),
